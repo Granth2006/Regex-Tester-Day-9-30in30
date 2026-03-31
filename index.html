@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RegexLab — Interactive Regex Tester</title>
+  <meta name="description" content="RegexLab: A fast, powerful, interactive regex tester. Highlight matches, inspect capture groups, explain patterns, and more — all in your browser." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header" role="banner">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Regex<span class="logo-accent">Lab</span></span>
+      </div>
+      <span class="header-tagline">Interactive Regex Tester</span>
+    </div>
+    <div class="header-right">
+      <div class="match-badge" id="headerMatchBadge" aria-live="polite">
+        <span class="badge-count" id="headerMatchCount">0</span>
+        <span class="badge-label">matches</span>
+      </div>
+      <button class="btn btn-ghost" id="btnCopyRegex" title="Copy Regex" aria-label="Copy regex to clipboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Regex
+      </button>
+      <button class="btn btn-ghost" id="btnCopyJSON" title="Copy Results JSON" aria-label="Copy results as JSON">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Copy JSON
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="main-layout" role="main">
+
+    <!-- LEFT PANEL -->
+    <section class="panel panel-left" aria-label="Input controls">
+
+      <!-- Regex Input -->
+      <div class="card" id="regexCard">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">🔤</span> Pattern
+          </h2>
+          <div class="flag-group" role="group" aria-label="Regex flags">
+            <button class="flag-btn active" data-flag="g" title="Global — find all matches" id="flagG">g</button>
+            <button class="flag-btn" data-flag="i" title="Case Insensitive" id="flagI">i</button>
+            <button class="flag-btn" data-flag="m" title="Multiline" id="flagM">m</button>
+            <button class="flag-btn" data-flag="s" title="Dotall — dot matches newline" id="flagS">s</button>
+          </div>
+        </div>
+        <div class="regex-input-wrap" id="regexInputWrap">
+          <span class="regex-delimiter">/</span>
+          <input
+            type="text"
+            id="regexPattern"
+            class="regex-input"
+            placeholder="Enter regex pattern…"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="Regex pattern"
+          />
+          <span class="regex-delimiter">/</span>
+          <span class="regex-flags-display" id="regexFlagsDisplay">g</span>
+        </div>
+        <div class="regex-error" id="regexError" role="alert" aria-live="assertive"></div>
+        <div class="regex-explanation" id="regexExplanation" aria-live="polite"></div>
+      </div>
+
+      <!-- Presets -->
+      <div class="card" id="presetsCard">
+        <div class="card-header">
+          <h2 class="card-title"><span class="card-icon">🧪</span> Quick Presets</h2>
+        </div>
+        <div class="presets-grid" role="list" aria-label="Regex presets">
+          <button class="preset-btn" data-preset="email" role="listitem">📧 Email</button>
+          <button class="preset-btn" data-preset="url" role="listitem">🌐 URL</button>
+          <button class="preset-btn" data-preset="phone" role="listitem">📱 Phone</button>
+          <button class="preset-btn" data-preset="password" role="listitem">🔒 Password</button>
+          <button class="preset-btn" data-preset="ipv4" role="listitem">🖧 IPv4</button>
+          <button class="preset-btn" data-preset="hex" role="listitem">🎨 Hex Color</button>
+          <button class="preset-btn" data-preset="date" role="listitem">📅 Date</button>
+          <button class="preset-btn" data-preset="html" role="listitem">🏷️ HTML Tag</button>
+        </div>
+      </div>
+
+      <!-- Test String -->
+      <div class="card" id="testStringCard">
+        <div class="card-header">
+          <h2 class="card-title"><span class="card-icon">📄</span> Test String</h2>
+          <div class="card-actions">
+            <button class="btn btn-xs btn-ghost" id="btnImport" title="Load .txt file" aria-label="Import text file">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Import
+            </button>
+            <button class="btn btn-xs btn-ghost" id="btnClearText" title="Clear test string" aria-label="Clear test string">Clear</button>
+          </div>
+        </div>
+        <textarea
+          id="testString"
+          class="test-textarea"
+          placeholder="Paste or type your test string here…&#10;&#10;Example:&#10;Hello World — user@example.com&#10;Visit https://example.com today!"
+          spellcheck="false"
+          aria-label="Test string"
+        ></textarea>
+        <input type="file" id="fileInput" accept=".txt" hidden aria-label="File input" />
+      </div>
+
+      <!-- Replace Tool -->
+      <div class="card" id="replaceCard">
+        <div class="card-header">
+          <h2 class="card-title"><span class="card-icon">🔁</span> Replace Tool</h2>
+          <button class="btn btn-xs btn-primary" id="btnReplaceAll">Replace All</button>
+        </div>
+        <input
+          type="text"
+          id="replaceString"
+          class="replace-input"
+          placeholder="Replacement string (use $1, $2 for groups)…"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Replacement string"
+        />
+        <div class="replace-preview-wrap" id="replacePreviewWrap" hidden>
+          <div class="replace-preview-label">Preview:</div>
+          <div class="replace-preview" id="replacePreview" aria-live="polite"></div>
+          <button class="btn btn-xs btn-ghost" id="btnCopyReplace">Copy Result</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT PANEL -->
+    <section class="panel panel-right" aria-label="Results">
+
+      <!-- Match Navigator -->
+      <div class="card card-compact" id="navigatorCard">
+        <div class="navigator-row">
+          <div class="nav-stats" aria-live="polite">
+            <span id="navMatchText">No matches</span>
+          </div>
+          <div class="nav-controls">
+            <div class="highlight-mode">
+              <button class="mode-btn active" id="modeAll" title="Highlight all matches" aria-pressed="true">All</button>
+              <button class="mode-btn" id="modeSingle" title="Single match mode" aria-pressed="false">Single</button>
+            </div>
+            <button class="nav-btn" id="btnPrev" title="Previous match" aria-label="Previous match" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="nav-pos" id="navPosition" aria-live="polite">—</span>
+            <button class="nav-btn" id="btnNext" title="Next match" aria-label="Next match" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlighted Output -->
+      <div class="card" id="highlightCard">
+        <div class="card-header">
+          <h2 class="card-title"><span class="card-icon">🎯</span> Match Highlight</h2>
+          <button class="btn btn-xs btn-ghost" id="btnCopyMatches" aria-label="Copy all matched strings">Copy Matches</button>
+        </div>
+        <div
+          class="highlight-output"
+          id="highlightOutput"
+          aria-label="Highlighted match output"
+          aria-live="polite"
+        >
+          <span class="placeholder-hint">Enter a pattern and test string to see matches highlighted here.</span>
+        </div>
+      </div>
+
+      <!-- Match Results -->
+      <div class="card" id="resultsCard">
+        <div class="card-header">
+          <h2 class="card-title"><span class="card-icon">📊</span> Match Details</h2>
+        </div>
+        <div class="results-list" id="resultsList" aria-live="polite">
+          <div class="empty-results">
+            <span class="empty-icon">🔍</span>
+            <p>Results will appear here once matches are found.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
